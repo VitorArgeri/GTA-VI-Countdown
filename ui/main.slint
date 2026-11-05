@@ -1,0 +1,509 @@
+import { RoundAction, WallpaperTile, TimeUnit, AnchorCell, ColorSwatch, CelebrationEffect } from "components.slint";
+
+export component CountdownWindow inherits Window {
+    title: "GTA VI Countdown";
+    icon: @image-url("../assets/icon.png");
+    preferred-width: 1366px;
+    preferred-height: 768px;
+    min-width: 900px;
+    min-height: 560px;
+    background: #090b12;
+    forward-focus: keyboard-scope;
+
+    in-out property <image> wallpaper;
+    in property <image> wallpaper-one;
+    in property <image> wallpaper-two;
+    in property <image> wallpaper-three;
+    in-out property <int> wallpaper-index: 0;
+    in-out property <int> accent-index: 0;
+    in-out property <color> timer-accent: #e889b2;
+    in-out property <float> timer-scale: 1.0;
+    in-out property <float> position-x: 0.5;
+    in-out property <float> position-y: 0.5;
+    in-out property <int> active-anchor: 4;
+    in-out property <string> days: "000";
+    in-out property <string> hours: "00";
+    in-out property <string> minutes: "00";
+    in-out property <string> seconds: "00";
+    in-out property <string> volume-label: "35%";
+    in-out property <string> audio-message: "";
+    in-out property <string> settings-message: "";
+    in-out property <bool> launched: false;
+    in-out property <bool> wallpaper-sidebar-open: false;
+    in-out property <bool> settings-sidebar-open: false;
+    in-out property <bool> muted: false;
+    in-out property <float> pulse: 0.0;
+    in-out property <length> drag-start-x: 0px;
+    in-out property <length> drag-start-y: 0px;
+
+    callback select-wallpaper(int);
+    callback toggle-wallpaper-sidebar();
+    callback toggle-settings-sidebar();
+    callback close-sidebars();
+    callback set-anchor(int);
+    callback choose-accent(int);
+    callback scale-down();
+    callback scale-up();
+    callback save-dragged-position();
+    callback toggle-mute();
+    callback volume-up();
+    callback volume-down();
+    callback request-fullscreen();
+    callback request-windowed();
+
+    keyboard-scope := FocusScope {
+        width: root.width;
+        height: root.height;
+        key-pressed(event) => {
+            if (event.text == Key.F11) { root.request-fullscreen(); accept }
+            else if (event.text == Key.Escape) { root.request-windowed(); accept }
+            else { reject }
+        }
+    }
+
+    Image {
+        width: root.width;
+        height: root.height;
+        source: root.wallpaper;
+        image-fit: cover;
+    }
+    Rectangle {
+        width: root.width;
+        height: root.height;
+        background: #090b12;
+        opacity: 0.25;
+    }
+
+    Text {
+        x: 28px;
+        y: 25px;
+        text: "VICE CITY  /  19 NOV 2026";
+        color: #f8f7fa;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
+    Text {
+        x: root.width - 154px;
+        y: 25px;
+        text: "F11  ·  TELA CHEIA";
+        color: #e2e3e9;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    timer-card := Rectangle {
+        x: 20px + root.position-x * (root.width - self.width - 40px);
+        y: 20px + root.position-y * (root.height - self.height - 40px);
+        width: 636px * root.timer-scale;
+        height: 284px * root.timer-scale;
+        background: #0a0d174a;
+        border-radius: 18px * root.timer-scale;
+        border-width: 1px;
+        border-color: #e4e8f022;
+        animate x, y { duration: 230ms; easing: ease-out; enabled: !drag-area.pressed; }
+        animate width, height { duration: 230ms; easing: ease-out; }
+
+        Text {
+            x: 24px * root.timer-scale;
+            y: 21px * root.timer-scale;
+            width: parent.width - 48px * root.timer-scale;
+            height: 22px * root.timer-scale;
+            text: root.launched ? "O LANÇAMENTO CHEGOU" : "CONTAGEM PARA O LANÇAMENTO";
+            color: root.timer-accent;
+            font-size: 12px * root.timer-scale;
+            font-weight: 700;
+            letter-spacing: 3px;
+            horizontal-alignment: center;
+            animate color { duration: 240ms; easing: ease-in-out; }
+        }
+        Text {
+            x: 24px * root.timer-scale;
+            y: 49px * root.timer-scale;
+            width: parent.width - 48px * root.timer-scale;
+            height: 38px * root.timer-scale;
+            text: "GRAND THEFT AUTO VI";
+            color: #ffffff;
+            font-size: 23px * root.timer-scale;
+            font-weight: 700;
+            letter-spacing: 2px;
+            horizontal-alignment: center;
+        }
+        HorizontalLayout {
+            x: 47px * root.timer-scale;
+            y: 96px * root.timer-scale;
+            width: 542px * root.timer-scale;
+            height: 104px * root.timer-scale;
+            spacing: 10px * root.timer-scale;
+            TimeUnit { value: root.days; caption: "DIAS"; scale: root.timer-scale; accent: root.timer-accent; }
+            TimeUnit { value: root.hours; caption: "HORAS"; scale: root.timer-scale; accent: root.timer-accent; }
+            TimeUnit { value: root.minutes; caption: "MIN"; scale: root.timer-scale; accent: root.timer-accent; }
+            TimeUnit { value: root.seconds; caption: "SEG"; scale: root.timer-scale; accent: root.timer-accent; }
+        }
+        Text {
+            x: 22px * root.timer-scale;
+            y: 218px * root.timer-scale;
+            width: parent.width - 44px * root.timer-scale;
+            height: 18px * root.timer-scale;
+            text: root.launched ? "VICE CITY JÁ É SUA" : "19 DE NOVEMBRO  ·  00:00  ·  BRASÍLIA";
+            color: #c3c6d1;
+            font-size: 10px * root.timer-scale;
+            font-weight: 700;
+            letter-spacing: 2px;
+            horizontal-alignment: center;
+        }
+        Text {
+            x: 0px;
+            y: 254px * root.timer-scale;
+            width: parent.width;
+            height: 18px * root.timer-scale;
+            text: "ARRASTE PARA MOVER";
+            color: #8e93a3;
+            font-size: 8px * root.timer-scale;
+            font-weight: 700;
+            letter-spacing: 2px;
+            horizontal-alignment: center;
+            opacity: drag-area.has-hover ? 1 : 0;
+            animate opacity { duration: 150ms; }
+        }
+        drag-area := TouchArea {
+            mouse-cursor: move;
+            pointer-event(event) => {
+                if (event.kind == PointerEventKind.down) {
+                    root.drag-start-x = timer-card.x;
+                    root.drag-start-y = timer-card.y;
+                } else if (event.kind == PointerEventKind.up) {
+                    root.save-dragged-position();
+                }
+            }
+            moved => {
+                if (self.pressed) {
+                    root.active-anchor = -1;
+                    root.position-x = clamp((root.drag-start-x - 20px + self.mouse-x - self.pressed-x) / (root.width - timer-card.width - 40px), 0.0, 1.0);
+                    root.position-y = clamp((root.drag-start-y - 20px + self.mouse-y - self.pressed-y) / (root.height - timer-card.height - 40px), 0.0, 1.0);
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        width: root.width;
+        height: root.height;
+        background: #080a10;
+        opacity: (root.wallpaper-sidebar-open || root.settings-sidebar-open) ? 0.46 : 0.0;
+        animate opacity { duration: 280ms; easing: ease-in-out; }
+        TouchArea {
+            enabled: root.wallpaper-sidebar-open || root.settings-sidebar-open;
+            clicked => { root.close-sidebars(); }
+        }
+    }
+
+    Rectangle {
+        x: root.wallpaper-sidebar-open ? 0px : -340px;
+        y: 0px;
+        width: 340px;
+        height: root.height;
+        background: #0d101a;
+        border-width: 1px;
+        border-color: #343a49;
+        animate x { duration: 330ms; easing: ease-out; }
+
+        Text {
+            x: 22px;
+            y: 25px;
+            text: "CENÁRIOS";
+            color: #ff70a9;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+        Text {
+            x: 22px;
+            y: 45px;
+            text: "Escolha seu wallpaper";
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 700;
+        }
+        RoundAction {
+            x: 281px;
+            y: 22px;
+            glyph: "×";
+            clicked => { root.close-sidebars(); }
+        }
+        VerticalLayout {
+            x: 22px;
+            y: 92px;
+            width: 296px;
+            spacing: 10px;
+            WallpaperTile {
+                preview: root.wallpaper-one;
+                title: "JASON & LUCIA · ASSALTO";
+                selected: root.wallpaper-index == 0;
+                clicked => { root.select-wallpaper(0); }
+            }
+            WallpaperTile {
+                preview: root.wallpaper-two;
+                title: "JASON & LUCIA · VICE CITY";
+                selected: root.wallpaper-index == 1;
+                clicked => { root.select-wallpaper(1); }
+            }
+            WallpaperTile {
+                preview: root.wallpaper-three;
+                title: "VICE CITY · PÔR DO SOL";
+                selected: root.wallpaper-index == 2;
+                clicked => { root.select-wallpaper(2); }
+            }
+        }
+        Text {
+            x: 22px;
+            y: 497px;
+            text: "IMAGENS LOCAIS  ·  DISPONÍVEL OFFLINE";
+            color: #9197a7;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        Rectangle {
+            x: 22px;
+            y: 529px;
+            width: 296px;
+            height: 1px;
+            background: #343a49;
+        }
+        Text {
+            x: 22px;
+            y: 550px;
+            text: "TRILHA NO LANÇAMENTO";
+            color: #d5d7de;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        Text {
+            x: 22px;
+            y: 571px;
+            text: root.audio-message;
+            color: #ffc87b;
+            font-size: 9px;
+            wrap: word-wrap;
+        }
+    }
+
+    Rectangle {
+        x: root.settings-sidebar-open ? root.width - 360px : root.width;
+        y: 0px;
+        width: 360px;
+        height: root.height;
+        background: #0d101a;
+        border-width: 1px;
+        border-color: #343a49;
+        animate x { duration: 330ms; easing: ease-out; }
+
+        Text {
+            x: 22px;
+            y: 25px;
+            text: "ESTÚDIO";
+            color: #ff70a9;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+        Text {
+            x: 22px;
+            y: 45px;
+            text: "Personalize seu timer";
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 700;
+        }
+        RoundAction {
+            x: 301px;
+            y: 22px;
+            glyph: "×";
+            clicked => { root.close-sidebars(); }
+        }
+        Text {
+            x: 22px;
+            y: 96px;
+            text: "ALINHAMENTO";
+            color: #d5d7de;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        HorizontalLayout {
+            x: 22px;
+            y: 119px;
+            width: 144px;
+            height: 40px;
+            spacing: 8px;
+            AnchorCell { index: 0; selected: root.active-anchor; chosen(index) => { root.set-anchor(index); } }
+            AnchorCell { index: 1; selected: root.active-anchor; chosen(index) => { root.set-anchor(index); } }
+            AnchorCell { index: 2; selected: root.active-anchor; chosen(index) => { root.set-anchor(index); } }
+        }
+        HorizontalLayout {
+            x: 22px;
+            y: 167px;
+            width: 144px;
+            height: 40px;
+            spacing: 8px;
+            AnchorCell { index: 3; selected: root.active-anchor; chosen(index) => { root.set-anchor(index); } }
+            AnchorCell { index: 4; selected: root.active-anchor; chosen(index) => { root.set-anchor(index); } }
+            AnchorCell { index: 5; selected: root.active-anchor; chosen(index) => { root.set-anchor(index); } }
+        }
+        HorizontalLayout {
+            x: 22px;
+            y: 215px;
+            width: 144px;
+            height: 40px;
+            spacing: 8px;
+            AnchorCell { index: 6; selected: root.active-anchor; chosen(index) => { root.set-anchor(index); } }
+            AnchorCell { index: 7; selected: root.active-anchor; chosen(index) => { root.set-anchor(index); } }
+            AnchorCell { index: 8; selected: root.active-anchor; chosen(index) => { root.set-anchor(index); } }
+        }
+        Text {
+            x: 180px;
+            y: 125px;
+            width: 156px;
+            height: 94px;
+            text: "Escolha um dos 9 pontos ou arraste o timer para ajustar livremente.";
+            color: #9ca2b1;
+            font-size: 10px;
+            wrap: word-wrap;
+        }
+        Rectangle { x: 22px; y: 274px; width: 316px; height: 1px; background: #343a49; }
+        Text {
+            x: 22px;
+            y: 294px;
+            text: "COR GTA VI";
+            color: #d5d7de;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        HorizontalLayout {
+            x: 22px;
+            y: 317px;
+            width: 202px;
+            height: 36px;
+            spacing: 8px;
+            ColorSwatch { value: #e889b2; selected: root.accent-index == 0; chosen => { root.choose-accent(0); } }
+            ColorSwatch { value: #77cfc8; selected: root.accent-index == 1; chosen => { root.choose-accent(1); } }
+            ColorSwatch { value: #e3ad7b; selected: root.accent-index == 2; chosen => { root.choose-accent(2); } }
+            ColorSwatch { value: #ae9dcc; selected: root.accent-index == 3; chosen => { root.choose-accent(3); } }
+            ColorSwatch { value: #e8d8bb; selected: root.accent-index == 4; chosen => { root.choose-accent(4); } }
+        }
+        Rectangle { x: 22px; y: 373px; width: 316px; height: 1px; background: #343a49; }
+        Text {
+            x: 22px;
+            y: 393px;
+            text: "TAMANHO";
+            color: #d5d7de;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        RoundAction { x: 22px; y: 416px; width: 40px; height: 40px; glyph: "−"; clicked => { root.scale-down(); } }
+        Text {
+            x: 72px;
+            y: 420px;
+            width: 108px;
+            height: 32px;
+            text: "\{round(root.timer-scale * 100)}%";
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 700;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+        RoundAction { x: 190px; y: 416px; width: 40px; height: 40px; glyph: "+"; clicked => { root.scale-up(); } }
+        Text {
+            x: 245px;
+            y: 422px;
+            width: 93px;
+            height: 28px;
+            text: "70—110%";
+            color: #9399a8;
+            font-size: 10px;
+            vertical-alignment: center;
+        }
+        Rectangle { x: 22px; y: 475px; width: 316px; height: 1px; background: #343a49; }
+        Text {
+            x: 22px;
+            y: 495px;
+            text: "ÁUDIO NO LANÇAMENTO";
+            color: #d5d7de;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        RoundAction { x: 22px; y: 518px; width: 40px; height: 40px; glyph: "−"; clicked => { root.volume-down(); } }
+        Text {
+            x: 72px;
+            y: 522px;
+            width: 100px;
+            height: 32px;
+            text: root.volume-label;
+            color: root.timer-accent;
+            font-size: 16px;
+            font-weight: 700;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            animate color { duration: 200ms; }
+        }
+        RoundAction { x: 182px; y: 518px; width: 40px; height: 40px; glyph: "+"; clicked => { root.volume-up(); } }
+        RoundAction {
+            x: 238px;
+            y: 518px;
+            width: 100px;
+            height: 40px;
+            border-radius: 12px;
+            glyph: root.muted ? "×" : "♫";
+            clicked => { root.toggle-mute(); }
+        }
+        Text {
+            x: 22px;
+            y: 573px;
+            width: 316px;
+            height: 40px;
+            text: root.audio-message;
+            color: #ffc87b;
+            font-size: 9px;
+            wrap: word-wrap;
+        }
+        Text {
+            x: 22px;
+            y: 621px;
+            width: 316px;
+            height: 46px;
+            text: root.settings-message;
+            color: #ff9999;
+            font-size: 9px;
+            wrap: word-wrap;
+        }
+    }
+
+    RoundAction {
+        x: 24px;
+        y: root.height - 66px;
+        glyph: "▧";
+        enabled: !root.wallpaper-sidebar-open;
+        clicked => { root.toggle-wallpaper-sidebar(); }
+    }
+    RoundAction {
+        x: root.width - 68px;
+        y: root.height - 66px;
+        glyph: "◈";
+        enabled: !root.settings-sidebar-open;
+        clicked => { root.toggle-settings-sidebar(); }
+    }
+
+    if root.launched : CelebrationEffect {
+        width: root.width;
+        height: root.height;
+        pulse: root.pulse;
+        accent: root.timer-accent;
+    }
+}

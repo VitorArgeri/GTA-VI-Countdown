@@ -1,0 +1,193 @@
+export component RoundAction inherits Rectangle {
+    in property <string> glyph;
+    in property <bool> enabled: true;
+    callback clicked();
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    background: touch.has-hover ? #242a3c : #111522;
+    border-width: 1px;
+    border-color: touch.has-hover ? #f36ba9 : #777b8a;
+    animate background, border-color { duration: 180ms; easing: ease-out; }
+
+    Text {
+        width: parent.width;
+        height: parent.height;
+        text: root.glyph;
+        color: touch.has-hover ? #ff8fbd : #ffffff;
+        font-size: 20px;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        animate color { duration: 180ms; }
+    }
+    touch := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
+export component WallpaperTile inherits Rectangle {
+    in property <image> preview;
+    in property <string> title;
+    in property <bool> selected;
+    callback clicked();
+    width: 296px;
+    height: 126px;
+    border-radius: 12px;
+    border-width: selected ? 2px : 1px;
+    border-color: selected ? #ff5b9a : (touch.has-hover ? #7f8b9e : #353a48);
+    background: #141824;
+    animate border-color { duration: 180ms; easing: ease-out; }
+
+    Image {
+        x: 0px;
+        y: 0px;
+        width: parent.width;
+        height: 94px;
+        source: root.preview;
+        image-fit: cover;
+    }
+    Text {
+        x: 12px;
+        y: 101px;
+        width: parent.width - 24px;
+        height: 18px;
+        text: root.title;
+        color: #f5f4f7;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+    touch := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
+export component TimeUnit inherits Rectangle {
+    in property <string> value;
+    in property <string> caption;
+    in property <float> scale: 1.0;
+    in property <color> accent;
+    width: 128px * root.scale;
+    height: 104px * root.scale;
+    background: #11152145;
+    border-radius: 14px * root.scale;
+    border-width: 1px;
+    border-color: #e0e3ed33;
+
+    VerticalLayout {
+        alignment: center;
+        spacing: 5px * root.scale;
+        Text {
+            text: root.value;
+            color: #f1eff2;
+            font-size: 47px * root.scale;
+            font-weight: 700;
+            horizontal-alignment: center;
+        }
+        Text {
+            text: root.caption;
+            color: root.accent;
+            font-size: 9px * root.scale;
+            font-weight: 700;
+            letter-spacing: 2px;
+            horizontal-alignment: center;
+            animate color { duration: 240ms; easing: ease-in-out; }
+        }
+    }
+}
+
+export component AnchorCell inherits Rectangle {
+    in property <int> index;
+    in property <int> selected;
+    callback chosen(int);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: selected == root.index ? #292237 : (touch.has-hover ? #242a36 : #171b26);
+    border-width: 1px;
+    border-color: selected == root.index ? #ff5b9a : #343a49;
+    animate background, border-color { duration: 160ms; easing: ease-out; }
+
+    Rectangle {
+        x: 9px;
+        y: 9px;
+        width: 22px;
+        height: 22px;
+        border-radius: 4px;
+        background: #303644;
+        Rectangle {
+            x: 3px + Math.mod(root.index, 3) * 6px;
+            y: 3px + Math.floor(root.index / 3) * 6px;
+            width: 4px;
+            height: 4px;
+            border-radius: 2px;
+            background: selected == root.index ? #ff75ad : #c7cad2;
+            animate background { duration: 160ms; }
+        }
+    }
+    touch := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.chosen(root.index); }
+    }
+}
+
+export component ColorSwatch inherits Rectangle {
+    in property <color> value;
+    in property <bool> selected;
+    callback chosen();
+    width: 34px;
+    height: 34px;
+    border-radius: 17px;
+    background: selected ? #353a49 : #181c27;
+    border-width: selected ? 2px : 1px;
+    border-color: selected ? #ffffff : #444a58;
+    animate border-width { duration: 160ms; easing: ease-out; }
+
+    Rectangle {
+        x: 5px;
+        y: 5px;
+        width: 22px;
+        height: 22px;
+        border-radius: 11px;
+        background: root.value;
+    }
+    touch := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.chosen(); }
+    }
+}
+
+export component CelebrationEffect inherits Rectangle {
+    in property <float> pulse;
+    in property <color> accent;
+    background: transparent;
+    opacity: 0.5;
+
+    Rectangle {
+        x: (parent.width - (300px + root.pulse * 100px)) / 2;
+        y: (parent.height - (300px + root.pulse * 100px)) / 2;
+        width: 300px + root.pulse * 100px;
+        height: 300px + root.pulse * 100px;
+        border-radius: 220px;
+        border-width: 3px;
+        border-color: root.accent;
+        background: transparent;
+        opacity: 0.5;
+        animate width, height, opacity { duration: 140ms; easing: ease-in-out; }
+    }
+    Rectangle {
+        x: (parent.width - (450px + root.pulse * 140px)) / 2;
+        y: (parent.height - (450px + root.pulse * 140px)) / 2;
+        width: 450px + root.pulse * 140px;
+        height: 450px + root.pulse * 140px;
+        border-radius: 300px;
+        border-width: 2px;
+        border-color: #ffb45e;
+        background: transparent;
+        opacity: 0.26;
+        animate width, height, opacity { duration: 140ms; easing: ease-in-out; }
+    }
+}
