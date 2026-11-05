@@ -6,13 +6,12 @@ Aplicativo portátil para Windows que mostra a contagem regressiva até **19 de 
 
 O aplicativo não tem instalador. Você baixa um pacote ZIP, extrai a pasta e abre o executável. Não precisa instalar Rust, abrir o terminal ou estar conectado à internet para usar.
 
-1. Acesse a página de [versões do GTA VI Countdown](https://github.com/VitorArgeri/GTA-VI-Contagem/releases).
-2. Baixe o pacote portátil **GTA-VI-Countdown-Windows-x64.zip** da versão mais recente.
-3. No Explorador de Arquivos, clique com o botão direito no ZIP e escolha **Extrair tudo**. Abra o conteúdo extraído; não execute o programa de dentro do ZIP.
-4. Confira se `gta-vi-countdown.exe` e a pasta `assets` estão juntos na mesma pasta. Não mova o executável sozinho.
-5. Clique duas vezes em `gta-vi-countdown.exe` para iniciar. Para criar um atalho, clique com o botão direito nele e escolha **Mostrar mais opções → Criar atalho**.
+1. Baixe o [pacote pronto para Windows x64](https://github.com/VitorArgeri/GTA-VI-Countdown/raw/refs/heads/main/dist/GTA-VI-Countdown-Windows-x64.zip).
+2. No Explorador de Arquivos, clique com o botão direito no ZIP e escolha **Extrair tudo**. Abra o conteúdo extraído; não execute o programa de dentro do ZIP.
+3. Confira se `gta-vi-countdown.exe` e a pasta `assets` estão juntos na mesma pasta. Não mova o executável sozinho.
+4. Clique duas vezes em `gta-vi-countdown.exe` para iniciar. Para criar um atalho, clique com o botão direito nele e escolha **Mostrar mais opções → Criar atalho**.
 
-**Atenção:** no momento, ainda não há um pacote publicado na página de versões. O botão **Code → Download ZIP** baixa o código-fonte e não inclui o executável. Para instalar sem programar, será necessário baixar o pacote portátil quando ele for publicado ou receber a pasta `dist` pronta.
+O botão **Code → Download ZIP** baixa o código-fonte. Para instalar sem programar, use o link do pacote pronto acima.
 
 O Windows pode mostrar um aviso de editor desconhecido porque o aplicativo não possui assinatura digital. Só abra o executável se ele veio da página oficial do projeto ou de alguém em quem você confia.
 
