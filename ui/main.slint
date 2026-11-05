@@ -1,4 +1,4 @@
-import { RoundAction, WallpaperTile, TimeUnit, AnchorCell, ColorSwatch, CelebrationEffect } from "components.slint";
+import { RoundAction, WallpaperTile, TimerCard, AnchorCell, ColorSwatch, CelebrationEffect } from "components.slint";
 
 export component CountdownWindow inherits Window {
     title: "GTA VI Countdown";
@@ -18,6 +18,7 @@ export component CountdownWindow inherits Window {
     in-out property <int> accent-index: 0;
     in-out property <color> timer-accent: #e889b2;
     in-out property <float> timer-scale: 1.0;
+    in-out property <float> timer-visibility: 0.5;
     in-out property <float> position-x: 0.5;
     in-out property <float> position-y: 0.5;
     in-out property <int> active-anchor: 4;
@@ -35,6 +36,8 @@ export component CountdownWindow inherits Window {
     in-out property <float> pulse: 0.0;
     in-out property <length> drag-start-x: 0px;
     in-out property <length> drag-start-y: 0px;
+    in-out property <bool> timer-dragging: false;
+    in-out property <bool> timer-drag-changed: false;
 
     callback select-wallpaper(int);
     callback toggle-wallpaper-sidebar();
@@ -44,6 +47,8 @@ export component CountdownWindow inherits Window {
     callback choose-accent(int);
     callback scale-down();
     callback scale-up();
+    callback opacity-down();
+    callback opacity-up();
     callback save-dragged-position();
     callback toggle-mute();
     callback volume-up();
@@ -93,95 +98,55 @@ export component CountdownWindow inherits Window {
         letter-spacing: 1px;
     }
 
-    timer-card := Rectangle {
-        x: 20px + root.position-x * (root.width - self.width - 40px);
-        y: 20px + root.position-y * (root.height - self.height - 40px);
-        width: 636px * root.timer-scale;
-        height: 284px * root.timer-scale;
-        background: #0a0d174a;
-        border-radius: 18px * root.timer-scale;
-        border-width: 1px;
-        border-color: #e4e8f022;
-        animate x, y { duration: 230ms; easing: ease-out; enabled: !drag-area.pressed; }
+    timer-card := TimerCard {
+        viewport-width: root.width;
+        viewport-height: root.height;
+        position-x: root.position-x;
+        position-y: root.position-y;
+        scale: root.timer-scale;
+        visibility: root.timer-visibility;
+        accent: root.timer-accent;
+        days: root.days;
+        hours: root.hours;
+        minutes: root.minutes;
+        seconds: root.seconds;
+        launched: root.launched;
+        dragging: root.timer-dragging;
+        drag-hover: drag-area.has-hover;
+    }
+    drag-area := TouchArea {
+        x: root.timer-dragging ? root.drag-start-x : timer-card.x;
+        y: root.timer-dragging ? root.drag-start-y : timer-card.y;
+        width: timer-card.width;
+        height: timer-card.height;
+        mouse-cursor: move;
+        animate x, y { duration: 230ms; easing: ease-out; enabled: !root.timer-dragging; }
         animate width, height { duration: 230ms; easing: ease-out; }
-
-        Text {
-            x: 24px * root.timer-scale;
-            y: 21px * root.timer-scale;
-            width: parent.width - 48px * root.timer-scale;
-            height: 22px * root.timer-scale;
-            text: root.launched ? "O LANÇAMENTO CHEGOU" : "CONTAGEM PARA O LANÇAMENTO";
-            color: root.timer-accent;
-            font-size: 12px * root.timer-scale;
-            font-weight: 700;
-            letter-spacing: 3px;
-            horizontal-alignment: center;
-            animate color { duration: 240ms; easing: ease-in-out; }
+        pointer-event(event) => {
+            if (event.kind == PointerEventKind.down) {
+                root.drag-start-x = timer-card.x;
+                root.drag-start-y = timer-card.y;
+                root.timer-drag-changed = false;
+                root.timer-dragging = true;
+            } else if (event.kind == PointerEventKind.up || event.kind == PointerEventKind.cancel) {
+                root.timer-dragging = false;
+                if (root.timer-drag-changed) { root.save-dragged-position(); }
+                root.timer-drag-changed = false;
+            }
         }
-        Text {
-            x: 24px * root.timer-scale;
-            y: 49px * root.timer-scale;
-            width: parent.width - 48px * root.timer-scale;
-            height: 38px * root.timer-scale;
-            text: "GRAND THEFT AUTO VI";
-            color: #ffffff;
-            font-size: 23px * root.timer-scale;
-            font-weight: 700;
-            letter-spacing: 2px;
-            horizontal-alignment: center;
-        }
-        HorizontalLayout {
-            x: 47px * root.timer-scale;
-            y: 96px * root.timer-scale;
-            width: 542px * root.timer-scale;
-            height: 104px * root.timer-scale;
-            spacing: 10px * root.timer-scale;
-            TimeUnit { value: root.days; caption: "DIAS"; scale: root.timer-scale; accent: root.timer-accent; }
-            TimeUnit { value: root.hours; caption: "HORAS"; scale: root.timer-scale; accent: root.timer-accent; }
-            TimeUnit { value: root.minutes; caption: "MIN"; scale: root.timer-scale; accent: root.timer-accent; }
-            TimeUnit { value: root.seconds; caption: "SEG"; scale: root.timer-scale; accent: root.timer-accent; }
-        }
-        Text {
-            x: 22px * root.timer-scale;
-            y: 218px * root.timer-scale;
-            width: parent.width - 44px * root.timer-scale;
-            height: 18px * root.timer-scale;
-            text: root.launched ? "VICE CITY JÁ É SUA" : "19 DE NOVEMBRO  ·  00:00  ·  BRASÍLIA";
-            color: #c3c6d1;
-            font-size: 10px * root.timer-scale;
-            font-weight: 700;
-            letter-spacing: 2px;
-            horizontal-alignment: center;
-        }
-        Text {
-            x: 0px;
-            y: 254px * root.timer-scale;
-            width: parent.width;
-            height: 18px * root.timer-scale;
-            text: "ARRASTE PARA MOVER";
-            color: #8e93a3;
-            font-size: 8px * root.timer-scale;
-            font-weight: 700;
-            letter-spacing: 2px;
-            horizontal-alignment: center;
-            opacity: drag-area.has-hover ? 1 : 0;
-            animate opacity { duration: 150ms; }
-        }
-        drag-area := TouchArea {
-            mouse-cursor: move;
-            pointer-event(event) => {
-                if (event.kind == PointerEventKind.down) {
-                    root.drag-start-x = timer-card.x;
-                    root.drag-start-y = timer-card.y;
-                } else if (event.kind == PointerEventKind.up) {
-                    root.save-dragged-position();
+        moved => {
+            if (self.pressed && timer-card.placement-range-x != 0px) {
+                root.position-x = clamp((root.drag-start-x + self.mouse-x - self.pressed-x - timer-card.placement-origin-x) / timer-card.placement-range-x, 0.0, 1.0);
+                if (self.mouse-x != self.pressed-x) {
+                    root.timer-drag-changed = true;
+                    root.active-anchor = -1;
                 }
             }
-            moved => {
-                if (self.pressed) {
+            if (self.pressed && timer-card.placement-range-y != 0px) {
+                root.position-y = clamp((root.drag-start-y + self.mouse-y - self.pressed-y - timer-card.placement-origin-y) / timer-card.placement-range-y, 0.0, 1.0);
+                if (self.mouse-y != self.pressed-y) {
+                    root.timer-drag-changed = true;
                     root.active-anchor = -1;
-                    root.position-x = clamp((root.drag-start-x - 20px + self.mouse-x - self.pressed-x) / (root.width - timer-card.width - 40px), 0.0, 1.0);
-                    root.position-y = clamp((root.drag-start-y - 20px + self.mouse-y - self.pressed-y) / (root.height - timer-card.height - 40px), 0.0, 1.0);
                 }
             }
         }
@@ -399,7 +364,7 @@ export component CountdownWindow inherits Window {
         Text {
             x: 22px;
             y: 393px;
-            text: "TAMANHO";
+            text: "TAMANHO · 50–200%";
             color: #d5d7de;
             font-size: 10px;
             font-weight: 700;
@@ -407,9 +372,9 @@ export component CountdownWindow inherits Window {
         }
         RoundAction { x: 22px; y: 416px; width: 40px; height: 40px; glyph: "−"; clicked => { root.scale-down(); } }
         Text {
-            x: 72px;
+            x: 68px;
             y: 420px;
-            width: 108px;
+            width: 78px;
             height: 32px;
             text: "\{round(root.timer-scale * 100)}%";
             color: #ffffff;
@@ -418,17 +383,30 @@ export component CountdownWindow inherits Window {
             horizontal-alignment: center;
             vertical-alignment: center;
         }
-        RoundAction { x: 190px; y: 416px; width: 40px; height: 40px; glyph: "+"; clicked => { root.scale-up(); } }
+        RoundAction { x: 151px; y: 416px; width: 40px; height: 40px; glyph: "+"; clicked => { root.scale-up(); } }
         Text {
-            x: 245px;
-            y: 422px;
-            width: 93px;
-            height: 28px;
-            text: "70—110%";
+            x: 202px;
+            y: 393px;
+            text: "OPACIDADE · 50–100%";
             color: #9399a8;
             font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        RoundAction { x: 202px; y: 416px; width: 40px; height: 40px; glyph: "−"; clicked => { root.opacity-down(); } }
+        Text {
+            x: 246px;
+            y: 420px;
+            width: 44px;
+            height: 32px;
+            text: "\{round(root.timer-visibility * 100)}%";
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            horizontal-alignment: center;
             vertical-alignment: center;
         }
+        RoundAction { x: 296px; y: 416px; width: 40px; height: 40px; glyph: "+"; clicked => { root.opacity-up(); } }
         Rectangle { x: 22px; y: 475px; width: 316px; height: 1px; background: #343a49; }
         Text {
             x: 22px;
@@ -495,7 +473,7 @@ export component CountdownWindow inherits Window {
     RoundAction {
         x: root.width - 68px;
         y: root.height - 66px;
-        glyph: "◈";
+        glyph: "⚙";
         enabled: !root.settings-sidebar-open;
         clicked => { root.toggle-settings-sidebar(); }
     }

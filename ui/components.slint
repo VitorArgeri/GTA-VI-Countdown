@@ -99,6 +99,101 @@ export component TimeUnit inherits Rectangle {
     }
 }
 
+export component TimerCard inherits Rectangle {
+    in property <float> scale: 1.0;
+    in property <float> visibility: 0.5;
+    in property <float> position-x: 0.5;
+    in property <float> position-y: 0.5;
+    in property <length> viewport-width;
+    in property <length> viewport-height;
+    in property <color> accent;
+    in property <string> days;
+    in property <string> hours;
+    in property <string> minutes;
+    in property <string> seconds;
+    in property <bool> launched;
+    in property <bool> dragging;
+    in property <bool> drag-hover;
+    out property <length> placement-origin-x: 20px;
+    out property <length> placement-origin-y: 20px;
+    out property <length> placement-range-x: root.viewport-width - self.width - 40px;
+    out property <length> placement-range-y: root.viewport-height - self.height - 40px;
+    width: 636px * root.scale;
+    height: 284px * root.scale;
+    x: root.placement-origin-x + root.position-x * root.placement-range-x;
+    y: root.placement-origin-y + root.position-y * root.placement-range-y;
+    background: #0a0d17.with-alpha(0.29 + (root.visibility - 0.5) * 1.42);
+    border-radius: 18px * root.scale;
+    border-width: 1px;
+    border-color: #e4e8f022;
+    animate x, y { duration: 230ms; easing: ease-out; enabled: !root.dragging; }
+    animate width, height { duration: 230ms; easing: ease-out; }
+    animate background { duration: 180ms; easing: ease-in-out; }
+
+    Text {
+        x: 24px * root.scale;
+        y: 21px * root.scale;
+        width: parent.width - 48px * root.scale;
+        height: 22px * root.scale;
+        text: root.launched ? "O LANÇAMENTO CHEGOU" : "CONTAGEM PARA O LANÇAMENTO";
+        color: root.accent;
+        font-size: 12px * root.scale;
+        font-weight: 700;
+        letter-spacing: 3px;
+        horizontal-alignment: center;
+        animate color { duration: 240ms; easing: ease-in-out; }
+    }
+    Text {
+        x: 24px * root.scale;
+        y: 49px * root.scale;
+        width: parent.width - 48px * root.scale;
+        height: 38px * root.scale;
+        text: "GRAND THEFT AUTO VI";
+        color: #ffffff;
+        font-size: 23px * root.scale;
+        font-weight: 700;
+        letter-spacing: 2px;
+        horizontal-alignment: center;
+    }
+    HorizontalLayout {
+        x: 47px * root.scale;
+        y: 96px * root.scale;
+        width: 542px * root.scale;
+        height: 104px * root.scale;
+        spacing: 10px * root.scale;
+        TimeUnit { value: root.days; caption: "DIAS"; scale: root.scale; accent: root.accent; }
+        TimeUnit { value: root.hours; caption: "HORAS"; scale: root.scale; accent: root.accent; }
+        TimeUnit { value: root.minutes; caption: "MIN"; scale: root.scale; accent: root.accent; }
+        TimeUnit { value: root.seconds; caption: "SEG"; scale: root.scale; accent: root.accent; }
+    }
+    Text {
+        x: 22px * root.scale;
+        y: 218px * root.scale;
+        width: parent.width - 44px * root.scale;
+        height: 18px * root.scale;
+        text: root.launched ? "VICE CITY JÁ É SUA" : "19 DE NOVEMBRO  ·  00:00  ·  BRASÍLIA";
+        color: #c3c6d1;
+        font-size: 10px * root.scale;
+        font-weight: 700;
+        letter-spacing: 2px;
+        horizontal-alignment: center;
+    }
+    Text {
+        x: 0px;
+        y: 254px * root.scale;
+        width: parent.width;
+        height: 18px * root.scale;
+        text: "ARRASTE PARA MOVER";
+        color: #8e93a3;
+        font-size: 8px * root.scale;
+        font-weight: 700;
+        letter-spacing: 2px;
+        horizontal-alignment: center;
+        opacity: root.drag-hover ? 1 : 0;
+        animate opacity { duration: 150ms; }
+    }
+}
+
 export component AnchorCell inherits Rectangle {
     in property <int> index;
     in property <int> selected;

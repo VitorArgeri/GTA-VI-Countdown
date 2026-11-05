@@ -5,10 +5,10 @@ Timer em Rust e Slint para o lançamento brasileiro de Grand Theft Auto VI, prev
 ## Usar
 
 - Pressione **F11** para alternar entre janela e tela cheia; **Esc** volta ao modo normal.
-- O ícone inferior esquerdo abre a seleção de wallpaper. O ícone inferior direito abre as opções do timer.
+- O ícone de galeria à esquerda abre a seleção de wallpaper; a engrenagem à direita abre as opções do timer.
 - Arraste o cartão do timer para posicioná-lo. A grade 3×3 aplica alinhamentos padrão.
-- Escolha a cor GTA VI, ajuste o tamanho e controle o volume ou o silêncio na barra direita.
-- Wallpaper, cor, tamanho, posição e áudio são salvos automaticamente em `%APPDATA%\GTA VI Countdown\settings.json`.
+- Na barra direita, ajuste cor, tamanho entre **50% e 200%**, opacidade entre **50% e 100%** e volume. A opacidade inicial de 50% mantém o visual atual; 100% deixa o fundo do cartão sólido.
+- Wallpaper, cor, tamanho, opacidade, posição e áudio são salvos automaticamente em `%APPDATA%\GTA VI Countdown\settings.json`.
 - A música toca em loop ao chegar a zero. As animações de celebração também entram em loop.
 
 Mantenha a pasta `assets` ao lado do executável para que wallpapers e áudio funcionem sem internet. Para iniciar direto da pasta do projeto, execute `cargo run --release`.

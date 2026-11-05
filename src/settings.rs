@@ -16,6 +16,7 @@ pub struct Preferences {
     pub wallpaper: usize,
     pub accent: usize,
     pub scale: f32,
+    pub timer_visibility: f32,
     pub position_x: f32,
     pub position_y: f32,
     pub anchor: i32,
@@ -29,6 +30,7 @@ impl Default for Preferences {
             wallpaper: 0,
             accent: 0,
             scale: 1.0,
+            timer_visibility: 0.5,
             position_x: 0.5,
             position_y: 0.5,
             anchor: 4,
@@ -43,9 +45,14 @@ impl Preferences {
         self.wallpaper = self.wallpaper.min(WALLPAPER_COUNT - 1);
         self.accent = self.accent.min(ACCENT_COUNT - 1);
         self.scale = if self.scale.is_finite() {
-            self.scale.clamp(0.7, 1.1)
+            self.scale.clamp(0.5, 2.0)
         } else {
             1.0
+        };
+        self.timer_visibility = if self.timer_visibility.is_finite() {
+            self.timer_visibility.clamp(0.5, 1.0)
+        } else {
+            0.5
         };
         if !self.position_x.is_finite() {
             self.position_x = 0.5;
@@ -154,6 +161,12 @@ mod tests {
         assert_eq!(load_preferences(&path), Preferences::default());
         std::fs::write(&path, b"{broken").unwrap();
         assert_eq!(load_preferences(&path), Preferences::default());
+        std::fs::write(
+            &path,
+            br#"{"scale":1.0,"position_x":0.5,"position_y":0.5,"timer_opacity":1.0}"#,
+        )
+        .unwrap();
+        assert_eq!(load_preferences(&path).timer_visibility, 0.5);
     }
 
     #[test]
@@ -164,6 +177,7 @@ mod tests {
             wallpaper: 50,
             accent: 50,
             scale: 3.0,
+            timer_visibility: 0.0,
             position_x: -2.0,
             position_y: 2.0,
             anchor: 12,
@@ -176,7 +190,8 @@ mod tests {
             Preferences {
                 wallpaper: 2,
                 accent: 4,
-                scale: 1.1,
+                scale: 2.0,
+                timer_visibility: 0.5,
                 position_x: 0.0,
                 position_y: 1.0,
                 anchor: -1,
@@ -185,7 +200,8 @@ mod tests {
             }
         );
         let updated = Preferences {
-            scale: 0.85,
+            scale: 0.5,
+            timer_visibility: 1.0,
             muted: false,
             ..Preferences::default()
         };

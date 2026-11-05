@@ -95,6 +95,7 @@ fn configure_window(
     window.set_accent_index(settings.accent as i32);
     window.set_timer_accent(accent_color(settings.accent));
     window.set_timer_scale(settings.scale);
+    window.set_timer_visibility(settings.timer_visibility);
     window.set_position_x(settings.position_x);
     window.set_position_y(settings.position_y);
     window.set_active_anchor(settings.anchor);
@@ -176,6 +177,7 @@ fn connect_appearance_controls(
     connect_anchor_control(window, preferences, path);
     connect_accent_control(window, preferences, path);
     connect_scale_controls(window, preferences, path);
+    connect_opacity_controls(window, preferences, path);
     let weak = window.as_weak();
     let preferences = Rc::clone(preferences);
     let path = path.to_path_buf();
@@ -248,7 +250,7 @@ fn connect_scale_controls(
     preferences: &Rc<RefCell<Preferences>>,
     path: &Path,
 ) {
-    for (increase, delta) in [(false, -0.05), (true, 0.05)] {
+    for (increase, delta) in [(false, -0.1), (true, 0.1)] {
         let weak = window.as_weak();
         let preferences = Rc::clone(preferences);
         let path = path.to_path_buf();
@@ -269,9 +271,42 @@ fn change_scale(
     let Some(window) = window.upgrade() else {
         return;
     };
-    let scale = (window.get_timer_scale() + delta).clamp(0.7, 1.1);
+    let scale = (window.get_timer_scale() + delta).clamp(0.5, 2.0);
     window.set_timer_scale(scale);
     preferences.borrow_mut().scale = scale;
+    persist_preferences(&window, preferences, path);
+}
+
+fn connect_opacity_controls(
+    window: &CountdownWindow,
+    preferences: &Rc<RefCell<Preferences>>,
+    path: &Path,
+) {
+    for (increase, delta) in [(false, -0.1), (true, 0.1)] {
+        let weak = window.as_weak();
+        let preferences = Rc::clone(preferences);
+        let path = path.to_path_buf();
+        let callback = move || change_opacity(&weak, &preferences, &path, delta);
+        if increase {
+            window.on_opacity_up(callback);
+        } else {
+            window.on_opacity_down(callback);
+        }
+    }
+}
+
+fn change_opacity(
+    window: &Weak<CountdownWindow>,
+    preferences: &Rc<RefCell<Preferences>>,
+    path: &Path,
+    delta: f32,
+) {
+    let Some(window) = window.upgrade() else {
+        return;
+    };
+    let visibility = (window.get_timer_visibility() + delta).clamp(0.5, 1.0);
+    window.set_timer_visibility(visibility);
+    preferences.borrow_mut().timer_visibility = visibility;
     persist_preferences(&window, preferences, path);
 }
 
